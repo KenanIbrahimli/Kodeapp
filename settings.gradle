@@ -1,0 +1,2 @@
+rootProject.name = "Kode-app"
+include ':app'
