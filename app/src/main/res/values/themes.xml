@@ -2,8 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.Kodeapp" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryDark">@color/purple_700</item>
+        <item name="colorPrimary">#FFFFFF</item>
+        <item name="colorPrimaryDark">#FFFFFF</item>
         <item name="colorAccent">@color/teal_200</item>
         <!-- Customize your theme here. -->
     </style>
@@ -17,6 +17,6 @@
         <item name="android:background">@drawable/search_bar_</item>
         <item name="colorPrimary">@color/secondary_text</item>
         <item name="colorPrimaryDark">@color/tetriary_text</item>
-        <item name="colorAccent">#4E4EAF</item>
+        <item name="colorAccent">#FFFFFF</item>
     </style>
 </resources>

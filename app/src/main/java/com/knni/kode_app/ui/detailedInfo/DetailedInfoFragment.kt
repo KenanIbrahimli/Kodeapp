@@ -5,6 +5,7 @@ import android.provider.Contacts
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.knni.kode_app.R
@@ -30,6 +31,7 @@ class DetailedInfoFragment : Fragment() {
 
         binding = DataBindingUtil.inflate( inflater, R.layout.fragment_detailed_info, container, false)
 
+        getActivity()?.getActionBar()?.setDisplayHomeAsUpEnabled(false)
 
         return binding.root
     }
