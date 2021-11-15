@@ -8,3 +8,21 @@
 5. Set filter -2 hours
 6. Durability to internet connection loses - 1 hours
 7. Testing & Bug fixes - 3-4 hours 
+8. Sort in any page of viewpager
+9. Sort by date, credentials,
+10. DialogAction Fragments
+
+
+Result
+1. +
+2. +
+3. +
+4. +
+5. +
+6. +
+7. -
+8. -
+9. -
+10. -
+
+К сожалению не успел. Отправляю неготовый проект, иначе 2 дня моих стараний было бы зря)
