@@ -20,7 +20,9 @@ import com.knni.kode_app.api.Item
 import com.knni.kode_app.databinding.FragmentUserListBinding
 import com.knni.kode_app.ui.MainActivity
 import com.knni.kode_app.ui.detailedInfo.DetailedInfoFragment
+import com.knni.kode_app.utils.UserListFilter
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.*
 
 
 class UserListFragment : Fragment(), SearchView.OnQueryTextListener {
@@ -38,6 +40,9 @@ class UserListFragment : Fragment(), SearchView.OnQueryTextListener {
     var filterList: List<Item> = listOf()
 
     private lateinit var userAdapter: UsersListAdapter
+
+    var job = Job()
+    val coroutinesScope = CoroutineScope(Dispatchers.Main + job)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,18 +73,21 @@ class UserListFragment : Fragment(), SearchView.OnQueryTextListener {
 
 
 
-
         if (viewModel!!.isOnline(context!!)) {
             viewModel?.userRequestData((activity?.application as MainApplication).api)
+            viewModel?.allUserListResponse?.observe(viewLifecycleOwner, {allUsers ->
+                if (allUsers!=null) {
+                    allUsers.forEach {
+                        allUserList.add(it)
+                    }
+                }
+            })
+
             viewModel?._userListResponse?.observe(viewLifecycleOwner, { users ->
 
                 if (users != null) {
-
-                    users.forEach {
-                        allUserList.add(it)
-                    }
-                    filterList = allUserList
-                    userAdapter.emitData(filterList)
+                    userAdapter.emitData(users)
+                    userAdapter.notifyDataSetChanged()
 
                 } else {
                     Toast.makeText(
@@ -96,9 +104,6 @@ class UserListFragment : Fragment(), SearchView.OnQueryTextListener {
                 Toast.LENGTH_SHORT
             ).show()
         }
-
-
-
         return binding.root
     }
 
@@ -109,7 +114,10 @@ class UserListFragment : Fragment(), SearchView.OnQueryTextListener {
         arguments?.takeIf { it.containsKey(ARG_OBJECT) }?.apply {
             currentTab = (getInt(ARG_OBJECT).toString()).toInt()
         }
-        Log.d("TagCurrent", currentTab.toString())
+        UserListFilter.userListFilter = allUserList
+        Log.d("Loger", " alluserlist ${allUserList?.forEach {it.firstName}}")
+        Log.d("Loger", " alluserlist ${viewModel?._allUserList?.forEach {it.firstName}}")
+        Log.d("Loger", " userListFilter ${UserListFilter.userListFilter?.forEach {it.firstName}}")
 
 //        if (viewModel!!.isOnline(context!!)) {
 //            when (currentTab) {
@@ -129,18 +137,7 @@ class UserListFragment : Fragment(), SearchView.OnQueryTextListener {
 //            }
 //
 //        }
-
-        filterLiveData.observe(viewLifecycleOwner, { users ->
-            if (users != null) {
-                userAdapter.emitData(users)
-            } else {
-                Toast.makeText(
-                    activity?.applicationContext,
-                    "No data found",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        })
+        
     }
 
     private fun setRecyclerData(id: Int) {
@@ -183,18 +180,6 @@ class UserListFragment : Fragment(), SearchView.OnQueryTextListener {
             userAdapter.emitData(filterList)
         }
 
-        filterLiveData.observe(viewLifecycleOwner, { users ->
-            if (users != null) {
-                userAdapter.emitData(users)
-            } else {
-                Toast.makeText(
-                    activity?.applicationContext,
-                    "No data found",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        })
-
     }
 
 
@@ -211,40 +196,11 @@ class UserListFragment : Fragment(), SearchView.OnQueryTextListener {
         sv.setOnQueryTextListener(this)
     }
 
-    override fun onQueryTextSubmit(p0: String?): Boolean {
-        userAdapter.emitData(filterList)
-        return false
-    }
+    override fun onQueryTextSubmit(p0: String?): Boolean = false
+
 
     override fun onQueryTextChange(p0: String?): Boolean {
-        filteredUserList.clear()
-
-        var seachText = p0!!
-        if (seachText.isNotEmpty()) {
-            allUserList.forEach {
-                if (it.firstName.contains(p0, ignoreCase = true) ||
-                        it.position.contains(p0, ignoreCase = true) ||
-                    it.lastName.contains(p0, ignoreCase = true)){
-                    filteredUserList.add(it)
-
-                    filterLiveData.apply {
-                        this.value = filteredUserList
-                    }
-                }
-            }
-            binding.userList.adapter?.notifyDataSetChanged()
-        } else {
-            filteredUserList.clear()
-            filteredUserList.addAll(allUserList)
-
-            filterLiveData.apply {
-                this.value = allUserList
-            }
-
-            binding.userList.adapter?.notifyDataSetChanged()
-        }
-
+        viewModel?.filterUserList(p0, allUserList)
         return false
     }
-
 }

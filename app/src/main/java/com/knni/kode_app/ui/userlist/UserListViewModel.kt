@@ -25,13 +25,16 @@ class UserListViewModel(application: Application) : AndroidViewModel(application
 
     private var userListResponse: MutableLiveData<List<Item>> = MutableLiveData()
 
-    var _userListResponse: MutableLiveData<List<Item>> = userListResponse
+    var _userListResponse: LiveData<List<Item>> = userListResponse
+
+    var allUserListResponse: MutableLiveData<List<Item>> = MutableLiveData()
 
     private var allUserList: List<Item> = arrayListOf()
 
     private val compositeDisposable = CompositeDisposable()
 
-    private val _allUserList = UserListFilter.userListFilter
+    val _allUserList = UserListFilter.userListFilter
+
 
 
     override fun onCleared() {
@@ -51,19 +54,16 @@ class UserListViewModel(application: Application) : AndroidViewModel(application
                 if (response!!.isSuccessful) {
                     response.body().let {
                         userListResponse.postValue(it?.items)
+                        allUserListResponse.postValue(it?.items)
 
                     }
-                    allUserList.apply { this }
-                    Log.d("Tag", "succesa" )
                 } else {
                     userListResponse.postValue(null)
-                    Log.d("Tag", "null error")
                 }
             }
 
             override fun onFailure(call: Call<UserModelResponse>?, t: Throwable) {
                 userListResponse.postValue(null)
-                Log.d("Tag", "failure error")
             }
         }
         )
@@ -92,15 +92,19 @@ class UserListViewModel(application: Application) : AndroidViewModel(application
     }
 
 
-    fun filterUserList(input: String?) {
+    fun filterUserList(input: String?, allUserList: List<Item>) {
+
         input?.let { inputItem ->
 
                 val result = if (input.isNotEmpty()) {
-                    UserListFilter.userListFilter?.filter {
+                    allUserList?.filter {
                         it.firstName.contains(inputItem, ignoreCase = true)
+
                     }
+
                 } else {
-                    _allUserList
+                    allUserList
+
                 }
 
                 userListResponse.apply {
@@ -109,7 +113,7 @@ class UserListViewModel(application: Application) : AndroidViewModel(application
 
         } ?: run {
             userListResponse?.apply {
-                this.value = _allUserList
+                this.value = allUserList
             }
         }
     }
