@@ -16,7 +16,7 @@ class UniversalViewPagerAdapter(fragmentActivity: FragmentActivity): FragmentSta
         val fragment = UserListFragment()
         fragment.arguments = Bundle().apply {
 
-            putInt(ARG_OBJECT, i + 1)
+            putInt(ARG_OBJECT, i)
         }
         return fragment
     }

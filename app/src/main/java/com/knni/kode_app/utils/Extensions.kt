@@ -17,7 +17,7 @@ fun String.convertDate(birtday: String): String{
     var month = birtday.substring(5, 7)
     var _month = when(month){
         "01" -> "Январь"
-            "02" -> "Февраль"
+        "02" -> "Февраль"
         "03" -> "Март"
         "04" -> "Апрель"
         "05" -> "Май"

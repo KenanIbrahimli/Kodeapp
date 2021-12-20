@@ -8,18 +8,14 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.knni.kode_app.api.CodeApi
-import com.knni.kode_app.api.Item
-import com.knni.kode_app.api.UserModelResponse
+import com.knni.kode_app.api.*
 import com.knni.kode_app.utils.UserListFilter
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Exception
 
 class UserListViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -33,40 +29,34 @@ class UserListViewModel(application: Application) : AndroidViewModel(application
 
     private val compositeDisposable = CompositeDisposable()
 
-    val _allUserList = UserListFilter.userListFilter
+   // val _allUserList = UserListFilter.userListFilter
 
-
+    private var job = Job()
+    private var corutineScope = CoroutineScope(Dispatchers.IO + job)
 
     override fun onCleared() {
         compositeDisposable.dispose()
         super.onCleared()
     }
 
-
-    fun userRequestData(codeApi: CodeApi?) {
-
-        val call: Call<UserModelResponse>? = codeApi!!.getUsersData()
-        call?.enqueue(object : Callback<UserModelResponse> {
-            override fun onResponse(
-                call: Call<UserModelResponse>?,
-                response: Response<UserModelResponse>?
-            ) {
-                if (response!!.isSuccessful) {
-                    response.body().let {
-                        userListResponse.postValue(it?.items)
-                        allUserListResponse.postValue(it?.items)
-
-                    }
-                } else {
-                    userListResponse.postValue(null)
-                }
-            }
-
-            override fun onFailure(call: Call<UserModelResponse>?, t: Throwable) {
-                userListResponse.postValue(null)
-            }
-        }
-        )
+    fun getUserList(codeApi: CodeApi){
+         corutineScope.launch{
+             var result = Repository.getUsers(codeApi)
+             when(result){
+                 is ResultWrapper.Success ->{
+                     UserListFilter.userListFilter = result.value.items
+                     withContext(Dispatchers.Main){
+                     userListResponse.apply {
+                         this.value = result.value.items
+                     }
+                     }
+                 }
+                 is ResultWrapper.GenericError -> {
+                     var exception: Exception = result.error!!
+                     UserListFilter.userListFilter = listOf()
+                 }
+             }
+         }
     }
 
     fun isOnline(context: Context): Boolean {
@@ -95,16 +85,12 @@ class UserListViewModel(application: Application) : AndroidViewModel(application
     fun filterUserList(input: String?, allUserList: List<Item>) {
 
         input?.let { inputItem ->
-
                 val result = if (input.isNotEmpty()) {
                     allUserList?.filter {
                         it.firstName.contains(inputItem, ignoreCase = true)
-
                     }
-
                 } else {
                     allUserList
-
                 }
 
                 userListResponse.apply {

@@ -9,7 +9,7 @@ interface CodeApi {
 
     @GET("users")
     @Headers("Content-Type: application/json")
-    fun getUsersData(): Call<UserModelResponse>?
+    suspend fun getUsersData(): UserModelResponse
 }
 
 object Constants {

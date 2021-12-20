@@ -18,8 +18,8 @@ class UsersListAdapter(
     private var userList: ArrayList<Item> = arrayListOf()
 
 
-    fun emitData(newList: List<Item>){
-        val du = UserAdapterDiffUtil(userList, newList)
+    fun emitData(newList: List<Item>?){
+        val du = UserAdapterDiffUtil(userList, newList!!)
         val cDu = DiffUtil.calculateDiff(du)
 
         userList.clear()
